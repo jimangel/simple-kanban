@@ -1,0 +1,1234 @@
+openapi: 3.0.3
+info:
+  title: Kanban Simple API
+  description: |
+    A lightweight kanban board REST API for task management and bot integration.
+    Built with Go, SQLite, and designed for simplicity and performance.
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/yourusername/kanban-simple
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+  - url: https://kanban.yourdomain.com/api
+    description: Production server
+
+tags:
+  - name: Boards
+    description: Kanban board operations
+  - name: Lists
+    description: List (column) management within boards
+  - name: Cards
+    description: Card (task) operations
+  - name: Comments
+    description: Comments on cards
+  - name: Labels
+    description: Label management for card categorization
+  - name: Bot Integration
+    description: Endpoints optimized for bot automation
+  - name: Health
+    description: Service health monitoring
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API service is running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /boards:
+    get:
+      tags:
+        - Boards
+      summary: List all boards
+      description: Retrieve a list of all kanban boards
+      operationId: listBoards
+      responses:
+        '200':
+          description: List of boards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Boards
+      summary: Create a board
+      description: Create a new kanban board
+      operationId: createBoard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBoardRequest'
+      responses:
+        '201':
+          description: Board created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /boards/{boardId}:
+    get:
+      tags:
+        - Boards
+      summary: Get board details
+      description: Retrieve details of a specific board
+      operationId: getBoard
+      parameters:
+        - $ref: '#/components/parameters/boardId'
+      responses:
+        '200':
+          description: Board details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Boards
+      summary: Update board
+      description: Update an existing board's details
+      operationId: updateBoard
+      parameters:
+        - $ref: '#/components/parameters/boardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBoardRequest'
+      responses:
+        '200':
+          description: Board updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Boards
+      summary: Delete board
+      description: Delete a board and all its associated lists and cards
+      operationId: deleteBoard
+      parameters:
+        - $ref: '#/components/parameters/boardId'
+      responses:
+        '204':
+          description: Board deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /boards/{boardId}/lists:
+    get:
+      tags:
+        - Lists
+      summary: Get lists for a board
+      description: Retrieve all lists (columns) for a specific board
+      operationId: getBoardLists
+      parameters:
+        - $ref: '#/components/parameters/boardId'
+      responses:
+        '200':
+          description: List of lists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Lists
+      summary: Create a list
+      description: Create a new list (column) in a board
+      operationId: createList
+      parameters:
+        - $ref: '#/components/parameters/boardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateListRequest'
+      responses:
+        '201':
+          description: List created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /lists/{listId}:
+    get:
+      tags:
+        - Lists
+      summary: Get list details
+      description: Retrieve details of a specific list
+      operationId: getList
+      parameters:
+        - $ref: '#/components/parameters/listId'
+      responses:
+        '200':
+          description: List details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Lists
+      summary: Update list
+      description: Update a list's name or color
+      operationId: updateList
+      parameters:
+        - $ref: '#/components/parameters/listId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListRequest'
+      responses:
+        '200':
+          description: List updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Lists
+      summary: Delete list
+      description: Delete a list and all its cards
+      operationId: deleteList
+      parameters:
+        - $ref: '#/components/parameters/listId'
+      responses:
+        '204':
+          description: List deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /lists/{listId}/move:
+    patch:
+      tags:
+        - Lists
+      summary: Move/reorder list
+      description: Change the position of a list within a board
+      operationId: moveList
+      parameters:
+        - $ref: '#/components/parameters/listId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveListRequest'
+      responses:
+        '200':
+          description: List moved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /lists/{listId}/cards:
+    get:
+      tags:
+        - Cards
+      summary: Get cards in a list
+      description: Retrieve all cards in a specific list
+      operationId: getListCards
+      parameters:
+        - $ref: '#/components/parameters/listId'
+        - name: archived
+          in: query
+          description: Include archived cards
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: List of cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Cards
+      summary: Create a card
+      description: Create a new card in a list
+      operationId: createCard
+      parameters:
+        - $ref: '#/components/parameters/listId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCardRequest'
+      responses:
+        '201':
+          description: Card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards:
+    get:
+      tags:
+        - Cards
+      summary: Search cards
+      description: Search for cards across all boards with filters
+      operationId: searchCards
+      parameters:
+        - name: query
+          in: query
+          description: Search term (searches title and description)
+          schema:
+            type: string
+        - name: board_id
+          in: query
+          description: Filter by board ID
+          schema:
+            type: integer
+        - name: list_id
+          in: query
+          description: Filter by list ID
+          schema:
+            type: integer
+        - name: archived
+          in: query
+          description: Include archived cards
+          schema:
+            type: boolean
+            default: false
+        - name: label_id
+          in: query
+          description: Filter by label ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}:
+    get:
+      tags:
+        - Cards
+      summary: Get card details
+      description: Retrieve details of a specific card
+      operationId: getCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '200':
+          description: Card details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Cards
+      summary: Update card
+      description: Update a card's details
+      operationId: updateCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCardRequest'
+      responses:
+        '200':
+          description: Card updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Cards
+      summary: Delete card
+      description: Permanently delete a card
+      operationId: deleteCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '204':
+          description: Card deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/move:
+    patch:
+      tags:
+        - Cards
+      summary: Move card
+      description: Move a card to a different list or change its position
+      operationId: moveCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveCardRequest'
+      responses:
+        '200':
+          description: Card moved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/archive:
+    post:
+      tags:
+        - Cards
+      summary: Archive card
+      description: Archive a completed card
+      operationId: archiveCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '200':
+          description: Card archived successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/unarchive:
+    post:
+      tags:
+        - Cards
+      summary: Unarchive card
+      description: Restore an archived card
+      operationId: unarchiveCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '200':
+          description: Card unarchived successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Get card comments
+      description: Retrieve all comments for a card
+      operationId: getCardComments
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Comments
+      summary: Add comment
+      description: Add a comment to a card
+      operationId: addComment
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/quick:
+    post:
+      tags:
+        - Bot Integration
+      summary: Quick create card
+      description: Create a card by board and list names (for bot automation)
+      operationId: quickCreateCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickCreateCardRequest'
+      responses:
+        '201':
+          description: Card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /labels:
+    get:
+      tags:
+        - Labels
+      summary: Get all labels
+      description: Retrieve all available labels
+      operationId: getAllLabels
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Label'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Labels
+      summary: Create a label
+      description: Create a new label for categorization
+      operationId: createLabel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLabelRequest'
+      responses:
+        '201':
+          description: Label created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /labels/{labelId}:
+    get:
+      tags:
+        - Labels
+      summary: Get label details
+      description: Retrieve details of a specific label
+      operationId: getLabel
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        '200':
+          description: Label details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Labels
+      summary: Update label
+      description: Update a label's name or color
+      operationId: updateLabel
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLabelRequest'
+      responses:
+        '200':
+          description: Label updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Labels
+      summary: Delete label
+      description: Delete a label and remove it from all cards
+      operationId: deleteLabel
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        '204':
+          description: Label deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/labels:
+    get:
+      tags:
+        - Labels
+      summary: Get card labels
+      description: Get all labels assigned to a card
+      operationId: getCardLabels
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Label'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /cards/{cardId}/labels/{labelId}:
+    post:
+      tags:
+        - Labels
+      summary: Assign label to card
+      description: Assign a label to a card
+      operationId: assignLabelToCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        '200':
+          description: Label assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Label assigned to card successfully"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Labels
+      summary: Remove label from card
+      description: Remove a label from a card
+      operationId: removeLabelFromCard
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        '204':
+          description: Label removed successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    boardId:
+      name: boardId
+      in: path
+      required: true
+      description: Board ID
+      schema:
+        type: integer
+        minimum: 1
+
+    listId:
+      name: listId
+      in: path
+      required: true
+      description: List ID
+      schema:
+        type: integer
+        minimum: 1
+
+    cardId:
+      name: cardId
+      in: path
+      required: true
+      description: Card ID
+      schema:
+        type: integer
+        minimum: 1
+
+    labelId:
+      name: labelId
+      in: path
+      required: true
+      description: Label ID
+      schema:
+        type: integer
+        minimum: 1
+
+  schemas:
+    Board:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Development Board"
+        description:
+          type: string
+          example: "Main development kanban board"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+
+    CreateBoardRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Development Board"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Main development kanban board"
+      required:
+        - name
+
+    UpdateBoardRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Updated Board Name"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Updated description"
+
+    List:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        board_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "To Do"
+        position:
+          type: number
+          format: float
+          example: 1.0
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#3b82f6"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - board_id
+        - name
+        - position
+        - created_at
+        - updated_at
+
+    CreateListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "To Do"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#3b82f6"
+        position:
+          type: number
+          format: float
+          example: 2.0
+          description: "Position for ordering. If not provided, will be added at the end"
+      required:
+        - name
+
+    UpdateListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "In Progress"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#fbbf24"
+
+    MoveListRequest:
+      type: object
+      properties:
+        position:
+          type: number
+          format: float
+          example: 3.5
+          description: "New position for the list"
+      required:
+        - position
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        list_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Implement user authentication"
+        description:
+          type: string
+          example: "Add JWT-based authentication to the API"
+        position:
+          type: number
+          format: float
+          example: 1.0
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#ef4444"
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        archived:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - list_id
+        - title
+        - position
+        - archived
+        - created_at
+        - updated_at
+
+    CreateCardRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Implement user authentication"
+        description:
+          type: string
+          maxLength: 5000
+          example: "Add JWT-based authentication to the API"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#ef4444"
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        position:
+          type: number
+          format: float
+          description: "Position for ordering. If not provided, will be added at the end"
+      required:
+        - title
+
+    UpdateCardRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Updated title"
+        description:
+          type: string
+          maxLength: 5000
+          example: "Updated description"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#10b981"
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+
+    MoveCardRequest:
+      type: object
+      properties:
+        list_id:
+          type: integer
+          example: 2
+          description: "Target list ID"
+        position:
+          type: number
+          format: float
+          example: 1.5
+          description: "Position in the target list"
+      required:
+        - list_id
+
+    QuickCreateCardRequest:
+      type: object
+      properties:
+        board_name:
+          type: string
+          example: "Main Board"
+        list_name:
+          type: string
+          example: "Backlog"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Bug: Fix memory leak"
+        description:
+          type: string
+          maxLength: 5000
+          example: "Memory usage increases over time"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#ef4444"
+      required:
+        - title
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        card_id:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: "This task is blocked waiting for API design approval"
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - card_id
+        - content
+        - created_at
+
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          example: "This task is blocked waiting for API design approval"
+      required:
+        - content
+
+    Label:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Bug"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#ef4444"
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - color
+        - created_at
+
+    CreateLabelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "Bug"
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: "#ef4444"
+      required:
+        - name
+        - color
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "Invalid request body"
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validation:
+              value:
+                error: "Bad Request"
+                message: "title is required"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notFound:
+              value:
+                error: "Not Found"
+                message: "Card not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            dbError:
+              value:
+                error: "Internal Server Error"
+                message: "Database connection failed"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Optional JWT authentication for bot integration (not currently implemented)"
+
+security: []  # No authentication required by default

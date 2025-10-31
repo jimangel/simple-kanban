@@ -1,0 +1,33 @@
+services:
+  kanban:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: kanban-board
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      # Named volume for database persistence
+      - kanban-data:/app/data
+
+    environment:
+      - DATABASE_PATH=/app/data/kanban.db
+      - MIGRATIONS_PATH=/app/migrations
+      - PORT=8080
+      - GIN_MODE=release
+
+    restart: unless-stopped
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+volumes:
+  kanban-data:
+    driver: local

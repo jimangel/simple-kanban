@@ -1,0 +1,424 @@
+/* Global Styles */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Kanban Board Styles */
+.kanban-board {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    overflow-x: auto;
+    min-height: calc(100vh - 200px);
+    align-items: flex-start;
+}
+
+/* List Styles */
+.kanban-list {
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-width: 300px;
+    max-width: 300px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 220px);
+}
+
+.kanban-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.kanban-list-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.kanban-list-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.kanban-list-actions button {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.kanban-list-actions button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #2d3748;
+}
+
+/* Cards Container */
+.kanban-cards {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    min-height: 100px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.kanban-cards:empty::after {
+    content: "Drop cards here";
+    display: block;
+    text-align: center;
+    color: #a0aec0;
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Card Styles */
+.kanban-card {
+    background: white;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    position: relative;
+}
+
+.kanban-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.kanban-card-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #2d3748;
+}
+
+.kanban-card-description {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.kanban-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.kanban-card-labels {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.kanban-card-label {
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.kanban-card-due {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.kanban-card-due.overdue {
+    color: #e53e3e;
+}
+
+.kanban-card-comments {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Add Card Button */
+.add-card-btn {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px dashed #cbd5e0;
+    border-radius: 4px;
+    color: #718096;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.add-card-btn:hover {
+    background: white;
+    border-color: #4a5568;
+    color: #2d3748;
+}
+
+/* Quick Add Card Form */
+.quick-add-card {
+    background: white;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quick-add-card input {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.quick-add-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.quick-add-card-actions button {
+    flex: 1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+/* SortableJS Ghost Class */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #e2e8f0;
+}
+
+.sortable-chosen {
+    opacity: 0.8;
+}
+
+/* Board Selector */
+#boardSelector {
+    background: white;
+    border: 2px solid #e2e8f0;
+    font-weight: 500;
+}
+
+/* Scrollbar Styles */
+.kanban-board::-webkit-scrollbar,
+.kanban-cards::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.kanban-board::-webkit-scrollbar-track,
+.kanban-cards::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.kanban-board::-webkit-scrollbar-thumb,
+.kanban-cards::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.kanban-board::-webkit-scrollbar-thumb:hover,
+.kanban-cards::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Styles */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-footer {
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Comments */
+.comment {
+    background: #f7fafc;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-content {
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.comment-date {
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+/* Search Results */
+.search-result-item {
+    background: white;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-result-item:hover {
+    border-color: #4299e1;
+    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.2);
+}
+
+.search-result-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.search-result-meta {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+/* Archive Cards */
+.archived-card {
+    background: #f7fafc;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.archived-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.archived-card-title {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.archived-card-actions button {
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kanban-list {
+        min-width: 280px;
+        max-width: 280px;
+    }
+
+    .kanban-board {
+        padding: 0.5rem;
+    }
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.spinner-border {
+    margin-right: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: white;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    opacity: 0.9;
+}
+
+/* Inline Editing Styles */
+.board-title {
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    cursor: text;
+    display: inline-block;
+    outline: none;
+}
+
+.board-title:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.board-title:focus {
+    background: rgba(255, 255, 255, 0.95);
+    color: #2d3748;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.kanban-list-title[contenteditable="true"] {
+    cursor: text;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.kanban-list-title[contenteditable="true"]:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.kanban-list-title[contenteditable="true"]:focus {
+    background: white;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
